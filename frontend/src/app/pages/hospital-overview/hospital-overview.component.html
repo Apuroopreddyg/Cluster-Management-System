@@ -1,0 +1,28 @@
+@if (loading) {
+  <p>Loading hospital overview...</p>
+}
+
+@if (errorMessage) {
+  <p class="error">{{ errorMessage }}</p>
+}
+
+@if (overview) {
+
+  <h1>{{ overview.hospitalName }}</h1>
+  <p>Hospital Overview</p>
+
+  <div class="stats">
+
+    <div class="stat-card">
+      <h3>OP Records</h3>
+      <h1>{{ overview.totalOPRecords }}</h1>
+    </div>
+
+    <div class="stat-card">
+      <h3>Medicines</h3>
+      <h1>{{ overview.totalMedicines }}</h1>
+    </div>
+
+  </div>
+
+}

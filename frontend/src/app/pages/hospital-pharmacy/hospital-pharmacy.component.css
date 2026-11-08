@@ -1,0 +1,14 @@
+.page-header {
+  background: white;
+  padding: 24px;
+  border-radius: 10px;
+}
+
+h1 {
+  color: #172554;
+  margin-bottom: 8px;
+}
+
+p {
+  color: #64748b;
+}

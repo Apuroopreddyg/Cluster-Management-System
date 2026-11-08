@@ -1,0 +1,273 @@
+<div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">H</div>
+            <div>
+                <h2>HMS Portal</h2>
+                <span>Management System</span>
+            </div>
+        </div>
+
+        <div class="nav-heading">WORKSPACE</div>
+
+        <button class="nav-item active">
+            <span>▦</span> Dashboard
+        </button>
+
+        <div class="nav-heading">HOSPITAL CLUSTERS</div>
+
+        @for (cluster of clusters; track cluster.id) {
+        <button class="nav-item" [class.selected]="selectedCluster?.id === cluster.id" (click)="selectCluster(cluster)">
+            <span>▣</span>
+            {{ cluster.clusterName }}
+        </button>
+        }
+
+        <button class="nav-item add-nav" (click)="showClusterForm = true">
+            <span>＋</span> Add Cluster
+        </button>
+
+        <div class="sidebar-bottom">
+            <span class="online-dot"></span>
+            System Online
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+
+        <header class="topbar">
+            <div>
+                <h1>Cluster Management</h1>
+                <p>Manage your hospital network from one place</p>
+            </div>
+
+            <button class="secondary-btn" (click)="refresh()">
+                ↻ Refresh
+            </button>
+        </header>
+
+        @if (successMessage) {
+        <div class="success-message">{{ successMessage }}</div>
+        }
+
+        @if (errorMessage) {
+        <div class="error-message">{{ errorMessage }}</div>
+        }
+
+        <!-- Statistics -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>Total Clusters</span>
+                    <span class="stat-icon blue">▦</span>
+                </div>
+                <h2>{{ clusters.length }}</h2>
+                <small>Registered clusters</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>Total Hospitals</span>
+                    <span class="stat-icon purple">⌂</span>
+                </div>
+                <h2>{{ totalHospitals }}</h2>
+                <small>Across all clusters</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span>Active Clusters</span>
+                    <span class="stat-icon green">✓</span>
+                </div>
+                <h2>
+                    {{ activeClusterCount }}
+                </h2>
+                <small>Operational clusters</small>
+            </div>
+
+        </section>
+
+        <!-- Cluster cards -->
+        <section class="section">
+
+            <div class="section-header">
+                <div>
+                    <h2>Hospital Clusters</h2>
+                    <p>Select a cluster to view its hospitals</p>
+                </div>
+
+                <button class="primary-btn" (click)="showClusterForm = true">
+                    + Create Cluster
+                </button>
+            </div>
+
+            <div class="cluster-grid">
+
+                @for (cluster of clusters; track cluster.id) {
+                <div class="cluster-card" [class.chosen]="selectedCluster?.id === cluster.id"
+                    (click)="selectCluster(cluster)">
+
+                    <div class="cluster-card-top">
+                        <div class="cluster-icon">▦</div>
+                        <span class="status-pill" [class.inactive]="cluster.status !== 'ACTIVE'">
+                            {{ cluster.status }}
+                        </span>
+                    </div>
+
+                    <h3>{{ cluster.clusterName }}</h3>
+                    <p>{{ cluster.location }} · {{ cluster.clusterCode }}</p>
+
+                    <div class="cluster-footer">
+                        <span>Hospitals</span>
+                        <strong>{{ getHospitalCount(cluster.id) }}</strong>
+                    </div>
+
+                </div>
+                }
+
+                @if (clusters.length === 0 && !loading) {
+                <p>No clusters created yet.</p>
+                }
+
+            </div>
+        </section>
+
+        <!-- Hospital directory -->
+        <section class="section hospital-section">
+
+            <div class="section-header">
+                <div>
+                    <h2>
+                        {{ selectedCluster
+                        ? selectedCluster.clusterName + ' — Hospitals'
+                        : 'Hospital Directory' }}
+                    </h2>
+                    <p>
+                        {{ selectedCluster
+                        ? 'Hospitals assigned to this cluster'
+                        : 'Select a cluster to view its hospitals' }}
+                    </p>
+                </div>
+
+                @if (selectedCluster) {
+                <button class="primary-btn" (click)="openHospitalForm()">
+                    + Add Hospital
+                </button>
+                }
+            </div>
+
+            @if (loading) {
+            <p>Loading clusters...</p>
+            }
+
+            @if (selectedCluster && hospitals.length > 0) {
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hospital Name</th>
+                            <th>Hospital Code</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @for (hospital of hospitals; track hospital.id) {
+                        <tr>
+                            <td>
+                                <a [routerLink]="['/hospitals', hospital.id, 'overview']">
+                                    {{ hospital.hospitalName }}
+                                </a>
+                            </td>
+                            <td>{{ hospital.hospitalCode }}</td>
+                            <td>{{ hospital.location }}</td>
+                            <td>
+                                <span class="status-pill" [class.inactive]="hospital.status !== 'ACTIVE'">
+                                    {{ hospital.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            }
+
+            @if (selectedCluster && hospitals.length === 0 && !errorMessage) {
+            <div class="empty-state">
+                <div class="empty-icon">⌂</div>
+                <h3>No hospitals assigned</h3>
+                <p>Add a hospital to this cluster to get started.</p>
+                <button class="primary-btn" (click)="openHospitalForm()">
+                    Add Hospital
+                </button>
+            </div>
+            }
+
+        </section>
+
+    </main>
+</div>
+
+<!-- Create Cluster Modal -->
+@if (showClusterForm) {
+<div class="modal-overlay" (click)="showClusterForm = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Create New Cluster</h2>
+            <button class="close-btn" (click)="showClusterForm = false">×</button>
+        </div>
+
+        <form (ngSubmit)="createCluster()">
+            <label>Cluster Name</label>
+            <input name="clusterName" [(ngModel)]="newCluster.clusterName" placeholder="e.g. Hyderabad Cluster"
+                required>
+
+            <label>Cluster Code</label>
+            <input name="clusterCode" [(ngModel)]="newCluster.clusterCode" placeholder="e.g. CLU003" required>
+
+            <label>Location</label>
+            <input name="location" [(ngModel)]="newCluster.location" placeholder="Enter location" required>
+
+            <div class="modal-actions">
+                <button type="button" class="secondary-btn" (click)="showClusterForm = false">Cancel</button>
+                <button type="submit" class="primary-btn">Create Cluster</button>
+            </div>
+        </form>
+    </div>
+</div>
+}
+
+<!-- Add Hospital Modal -->
+@if (showHospitalForm) {
+<div class="modal-overlay" (click)="showHospitalForm = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Add Hospital</h2>
+            <button class="close-btn" (click)="showHospitalForm = false">×</button>
+        </div>
+
+        <form (ngSubmit)="createHospital()">
+            <label>Hospital Name</label>
+            <input name="hospitalName" [(ngModel)]="newHospital.hospitalName" placeholder="Enter hospital name"
+                required>
+
+            <label>Hospital Code</label>
+            <input name="hospitalCode" [(ngModel)]="newHospital.hospitalCode" placeholder="e.g. HSP003" required>
+
+            <label>Location</label>
+            <input name="location" [(ngModel)]="newHospital.location" required>
+
+            <div class="modal-actions">
+                <button type="button" class="secondary-btn" (click)="showHospitalForm = false">Cancel</button>
+                <button type="submit" class="primary-btn">Add Hospital</button>
+            </div>
+        </form>
+    </div>
+</div>
+}

@@ -1,0 +1,29 @@
+<div class="hospital-layout">
+
+  <aside class="sidebar">
+
+    <h2>Hospital Management</h2>
+
+    <nav>
+      <a [routerLink]="getHospitalRoute('overview')">
+        Overview
+      </a>
+
+      <a [routerLink]="getHospitalRoute('op')">
+        OP
+      </a>
+
+      <a [routerLink]="getHospitalRoute('pharmacy')">
+        Pharmacy
+      </a>
+    </nav>
+
+    <a routerLink="/">Back to Clusters</a>
+
+  </aside>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+</div>
